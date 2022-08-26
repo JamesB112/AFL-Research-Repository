@@ -1,0 +1,62 @@
+In this notebook, the afl player statistics data from the library 'fitzRoy' will
+be extracted and filtered into a raw file
+
+
+Load the data
+```{r}
+library(fitzRoy)
+```
+```{r}
+player_stats <- fetch_player_stats(season = seq(2010, 2022, 1), source = "footywire")
+write.csv(player_stats, file = '../data/raw/player_statistics.csv')
+```
+the afl player details dataset only has information from players 2013+, which is the optimal choice (contains infomation on player position) 
+
+First load the library
+```{r}
+library(dplyr)
+```
+
+Next collect all draft history from 2013 to 2022
+2013, 2019- have position data for some reason, whilst others do not. 
+To solve this issue we will also take positional data from each game to work out general position,
+with their heigh/weight then be used to determine role e.g Key_forward
+```{r}
+# collect the first year 
+draft_history <- fetch_player_details_afl(2013,   team = NULL,  comp = "AFLM")
+for (i in seq(2014, 2022, 1)) {
+  temp_history <- fetch_player_details_afl(i,   team = NULL,  comp = "AFLM")
+  if (!('position' %in% colnames(temp_history))) {
+    temp_history['position'] <- 'UNKNOWN'
+  }
+  draft_history <- union(draft_history,temp_history)
+}
+```
+Now we can save this dataset
+```{r}
+write.csv(draft_history, file = '../data/raw/draft_history.csv' )
+```
+Finally, we need to save the player position data so inputation on a 
+players position can be performed. The idea is first identifying whether 
+the player is either: Ruck, Forward, Midfielder or Defender.
+Then afterwards we can use physical data (heigh, weight) to
+determine their type
+
+for this we will use fetch_lineup
+```{r}
+# collect the first year 
+game_position <- fetch_lineup(season = 2013, comp = "AFLM")
+for (i in seq(2014, 2022, 1)) {
+  temp_position <- fetch_lineup(season = i, comp = "AFLM")
+  if ('lateChanges' %in% colnames(temp_position)) {
+    myvars <- names(temp_position) %in% c('lateChanges')
+    temp_position <- temp_position[!myvars]
+  }
+  game_position <- union(game_position,temp_position)
+}
+```
+Now we can save the game position data
+```{r}
+write.csv(game_position, file = '../data/raw/game_positions.csv')
+```
+Now we have finished downloading the data, and can begin cleaning/ "PREPORCESSING'

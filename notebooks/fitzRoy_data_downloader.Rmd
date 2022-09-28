@@ -59,4 +59,10 @@ Now we can save the game position data
 ```{r}
 write.csv(game_position, file = '../data/raw/game_positions.csv')
 ```
+Also, we need to take the afltables draft history as well to get number of games
+```{r}
+tables_draft <- fetch_player_details(source = "afltables")
+write.csv(tables_draft, file = '../data/raw/afltables_draft.csv')
+```
+
 Now we have finished downloading the data, and can begin cleaning/ "PREPORCESSING'

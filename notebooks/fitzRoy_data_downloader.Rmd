@@ -5,17 +5,21 @@ be extracted and filtered into a raw file
 Load the data
 ```{r}
 library(fitzRoy)
+library(dplyr)
 ```
 ```{r}
-player_stats <- fetch_player_stats(season = seq(2010, 2022, 1), source = "footywire")
+# collect the first year 
+player_stats <- fetch_player_stats(season = 2012, source = "AFL")
+player_stats <- subset(player_stats, select = c(providerId, utcStartTime, compSeason.shortName, round.name, round.roundNumber, venue.name, home.team.club.name, away.team.club.name, player.player.position, player.player.player.playerId, player.player.player.givenName, player.player.player.surname, teamId, timeOnGroundPercentage, goals, behinds, kicks, handballs, 	disposals, marks,	bounces,	tackles,	contestedPossessions,	uncontestedPossessions,	totalPossessions,	inside50s,	marksInside50,	contestedMarks,	hitouts,	onePercenters,	disposalEfficiency,	clangers,	freesFor,	freesAgainst,	dreamTeamPoints,	rebound50s,	goalAssists,	goalAccuracy,	ratingPoints,	turnovers,	intercepts,	tacklesInside50, teamStatus, player.playerId, player.jumperNumber, team.name))
+for (i in seq(2013, 2022, 1)) {
+  temp_stats <- fetch_player_stats(season = i, source = "AFL")
+  temp_stats <- subset(temp_stats, select = c(providerId, utcStartTime, compSeason.shortName, round.name, round.roundNumber, venue.name, home.team.club.name, away.team.club.name, player.player.position, player.player.player.playerId, player.player.player.givenName, player.player.player.surname, teamId, timeOnGroundPercentage, goals, behinds, kicks, handballs, 	disposals, marks,	bounces,	tackles,	contestedPossessions,	uncontestedPossessions,	totalPossessions,	inside50s,	marksInside50,	contestedMarks,	hitouts,	onePercenters,	disposalEfficiency,	clangers,	freesFor,	freesAgainst,	dreamTeamPoints,	rebound50s,	goalAssists,	goalAccuracy,	ratingPoints,	turnovers,	intercepts,	tacklesInside50, teamStatus, player.playerId, player.jumperNumber, team.name))
+  player_stats <- union(player_stats,temp_stats)
+}
 write.csv(player_stats, file = '../data/raw/player_statistics.csv')
 ```
 the afl player details dataset only has information from players 2013+, which is the optimal choice (contains infomation on player position) 
 
-First load the library
-```{r}
-library(dplyr)
-```
 
 Next collect all draft history from 2013 to 2022
 2013, 2019- have position data for some reason, whilst others do not. 
